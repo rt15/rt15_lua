@@ -2,7 +2,7 @@ RT_FILE_PATH_TYPE_NONE = 0;
 RT_FILE_PATH_TYPE_DIR = 1;
 RT_FILE_PATH_TYPE_FILE = 2;
 
-local open_lib, error_message = package.loadlib("../lib/rt15_luad.dll", "zz_open_lib");
+local open_lib, error_message = package.loadlib("rt15_luad.dll", "zz_open_lib");
 if open_lib == nil then
   error(error_message);
 end
@@ -31,4 +31,8 @@ end
 
 function replace_in_file(searched, replacement, file_path)
   return rt15_lua.replace_in_file(searched, replacement, file_path);
+end
+
+function list_files(dir_path, extension, recursive)
+  return rt15_lua.list_files(dir_path, extension, recursive);
 end
