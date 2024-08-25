@@ -36,3 +36,7 @@ end
 function list_files(dir_path, extension, recursive)
   return rt15_lua.list_files(dir_path, extension, recursive);
 end
+
+function convert_eol(file_path, eol)
+  return rt15_lua.convert_eol(file_path, eol);
+end

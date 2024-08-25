@@ -14,6 +14,7 @@ RT_EXPORT rt_n32 RT_CDECL zz_file_path_set_current_dir(lua_State *lua_state);
 /* Big functions. */
 RT_EXPORT rt_n32 RT_CDECL zz_replace_in_file(lua_State *lua_state);
 RT_EXPORT rt_n32 RT_CDECL zz_list_files(lua_State *lua_state);
+RT_EXPORT rt_n32 RT_CDECL zz_convert_eol(lua_State *lua_state);
 
 static const luaL_Reg zz_lib_functions[] = {
 	{ "file_path_get_type", zz_file_path_get_type },
@@ -23,6 +24,7 @@ static const luaL_Reg zz_lib_functions[] = {
 	{ "file_path_set_current_dir", zz_file_path_set_current_dir },
 	{ "replace_in_file", zz_replace_in_file },
 	{ "list_files", zz_list_files },
+	{ "convert_eol", zz_convert_eol },
 	{ RT_NULL, RT_NULL }
 };
 
