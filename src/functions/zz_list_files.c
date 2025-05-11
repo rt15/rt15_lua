@@ -22,12 +22,12 @@ static rt_s zz_list_files_callback(const rt_char *path, enum rt_file_path_type t
 	rt_un file_path_size;
 	rt_char8 *output;
 	rt_b push_path;
-	rt_s ret;
+	rt_s ret = RT_FAILED;
 
 	if (type == RT_FILE_PATH_TYPE_FILE) {
 
 		if (RT_UNLIKELY(!rt_encoding_encode(path, path_size, RT_ENCODING_SYSTEM_DEFAULT, file_path, RT_FILE_PATH_SIZE, RT_NULL, RT_NULL, &output, &file_path_size, RT_NULL)))
-			goto error;
+			goto end;
 
 		if (extension_size) {
 			push_path = rt_char_ends_with(path, path_size, extension, extension_size);
@@ -43,33 +43,25 @@ static rt_s zz_list_files_callback(const rt_char *path, enum rt_file_path_type t
 	}
 
 	ret = RT_OK;
-free:
+end:
 	return ret;
-
-error:
-	ret = RT_FAILED;
-	goto free;
 }
 
 static rt_s zz_list_files_do(lua_State *lua_state, rt_char *dir_path, rt_char *extension, rt_b recursively)
 {
 	struct zz_list_files_context list_files_context;
-	rt_s ret;
+	rt_s ret = RT_FAILED;
 
 	list_files_context.lua_state = lua_state;
 	list_files_context.extension = extension;
 	list_files_context.index = 1;
 
 	if (RT_UNLIKELY(!rt_file_path_browse(dir_path, &zz_list_files_callback, recursively, RT_TRUE, &list_files_context)))
-		goto error;
+		goto end;
 
 	ret = RT_OK;
-free:
+end:
 	return ret;
-
-error:
-	ret = RT_FAILED;
-	goto free;
 }
 
 rt_n32 RT_CDECL zz_list_files(lua_State *lua_state)
@@ -79,27 +71,26 @@ rt_n32 RT_CDECL zz_list_files(lua_State *lua_state)
 	rt_char extension[RT_CHAR_QUARTER_BIG_STRING_SIZE];
 	rt_un extension_size;
 	rt_b recursively; 
-	rt_s ret;
+	rt_n32 ret = 2;
 
 	lua_newtable(lua_state);
 
 	if (RT_UNLIKELY(!zz_lua_utils_get_char(lua_state, 1, dir_path, RT_FILE_PATH_SIZE, &dir_path_size)))
-		goto error;
+		goto end;
 
 	if (RT_UNLIKELY(!zz_lua_utils_get_char(lua_state, 2, extension, RT_FILE_PATH_SIZE, &extension_size)))
-		goto error;
+		goto end;
 
 	recursively = lua_toboolean(lua_state, 3);
 
 	if (RT_UNLIKELY(!zz_list_files_do(lua_state, dir_path, extension, recursively)))
-		goto error;
+		goto end;
 
 	ret = 1;
-free:
-	return ret;
+end:
+	if (RT_UNLIKELY(ret == 2)) {
+		zz_lua_utils_push_last_error_message(lua_state);
+	}
 
-error:
-	zz_lua_utils_push_last_error_message(lua_state);
-	ret = 2;
-	goto free;
+	return ret;
 }

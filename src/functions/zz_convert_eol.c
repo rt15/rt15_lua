@@ -13,40 +13,32 @@ static rt_s zz_convert_eol_callback(const rt_char8 *line, rt_un line_size, RT_UN
 {
 	struct rt_output_stream *output_stream = process_file_context->output_stream;
 	enum rt_eol target_eol = ((struct zz_convert_eol_context*)process_file_context->context)->eol;
-	rt_s ret;
+	rt_s ret = RT_FAILED;
 
 	if (RT_UNLIKELY(!output_stream->write(output_stream, line, line_size)))
-		goto error;
+		goto end;
 
 	if (RT_UNLIKELY(!rt_process_file_write_eol(target_eol, output_stream)))
-		goto error;
+		goto end;
 
 	ret = RT_OK;
-free:
+end:
 	return ret;
-
-error:
-	ret = RT_FAILED;
-	goto free;
 }
 
 static rt_s zz_convert_eol_do(rt_char *file_path, enum rt_eol eol)
 {
 	struct zz_convert_eol_context convert_eol_context;
-	rt_s ret;
+	rt_s ret = RT_FAILED;
 
 	convert_eol_context.eol = eol;
 
 	if (RT_UNLIKELY(!rt_process_file(file_path, &zz_convert_eol_callback, &convert_eol_context)))
-		goto error;
+		goto end;
 
 	ret = RT_OK;
-free:
+end:
 	return ret;
-
-error:
-	ret = RT_FAILED;
-	goto free;
 }
 
 rt_n32 RT_CDECL zz_convert_eol(lua_State *lua_state)
@@ -56,13 +48,13 @@ rt_n32 RT_CDECL zz_convert_eol(lua_State *lua_state)
 	rt_char eol_str[RT_CHAR_QUARTER_BIG_STRING_SIZE];
 	rt_un eol_str_size;
 	enum rt_eol eol;
-	rt_n32 ret;
+	rt_n32 ret = 1;
 
 	if (RT_UNLIKELY(!zz_lua_utils_get_char(lua_state, 1, file_path, RT_FILE_PATH_SIZE, &file_path_size)))
-		goto error;
+		goto end;
 
 	if (RT_UNLIKELY(!zz_lua_utils_get_char(lua_state, 2, eol_str, RT_CHAR_QUARTER_BIG_STRING_SIZE, &eol_str_size)))
-		goto error;
+		goto end;
 
 	rt_char_fast_upper(eol_str);
 	if (rt_char_equals(eol_str, eol_str_size, _R("CRLF"), 4)) {
@@ -71,18 +63,17 @@ rt_n32 RT_CDECL zz_convert_eol(lua_State *lua_state)
 		eol = RT_EOL_LF;
 	} else {
 		rt_error_set_last(RT_ERROR_BAD_ARGUMENTS);	
-		goto error;
+		goto end;
 	}
 
 	if (RT_UNLIKELY(!zz_convert_eol_do(file_path, eol)))
-		goto error;
+		goto end;
 
 	ret = 0;
-free:
-	return ret;
+end:
+	if (RT_UNLIKELY(ret)) {
+		zz_lua_utils_push_last_error_message(lua_state);
+	}
 
-error:
-	zz_lua_utils_push_last_error_message(lua_state);
-	ret = 1;
-	goto free;
+	return ret;
 }
