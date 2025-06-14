@@ -71,7 +71,7 @@ rt_n32 RT_CDECL zz_convert_eol(lua_State *lua_state)
 
 	ret = 0;
 end:
-	if (RT_UNLIKELY(ret)) {
+	if (RT_UNLIKELY(ret == 1)) {
 		zz_lua_utils_push_last_error_message(lua_state);
 	}
 
