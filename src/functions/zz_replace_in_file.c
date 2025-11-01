@@ -23,7 +23,6 @@ static rt_s zz_replace_in_file_callback(const rt_char8 *line, rt_un line_size, e
 	rt_un replacement_size = replace_in_file_context->replacement_size;
 	rt_char8 buffer[RT_CHAR8_HALF_BIG_STRING_SIZE];
 	rt_un buffer_size = 0;
-	rt_char8 *end_of_line;
 	rt_s ret = RT_FAILED;
 
 	if (RT_UNLIKELY(!rt_char8_replace(line, line_size, searched, searched_size, replacement, replacement_size, buffer, RT_CHAR8_HALF_BIG_STRING_SIZE, &buffer_size)))
@@ -32,28 +31,8 @@ static rt_s zz_replace_in_file_callback(const rt_char8 *line, rt_un line_size, e
 	if (RT_UNLIKELY(!output_stream->write(output_stream, buffer, buffer_size)))
 		goto end;
 
-	switch (eol) {
-	case RT_EOL_NONE:
-		end_of_line = RT_NULL;
-		break;
-	case RT_EOL_LF:
-		end_of_line = "\n";
-		break;
-	case RT_EOL_CRLF:
-		end_of_line = "\r\n";
-		break;
-	case RT_EOL_CR:
-		end_of_line = "\r";
-		break;
-	default:
-		rt_error_set_last(RT_ERROR_BAD_ARGUMENTS);
+	if (RT_UNLIKELY(!rt_process_file_write_eol(eol, output_stream)))
 		goto end;
-	}
-
-	if (end_of_line) {
-		if (RT_UNLIKELY(!output_stream->write(output_stream, end_of_line, rt_char8_get_size(end_of_line))))
-			goto end;
-	}
 
 	ret = RT_OK;
 end:
