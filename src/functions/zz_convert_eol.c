@@ -18,7 +18,7 @@ static rt_s zz_convert_eol_callback(const rt_char8 *line, rt_un line_size, RT_UN
 	if (RT_UNLIKELY(!output_stream->write(output_stream, line, line_size)))
 		goto end;
 
-	if (RT_UNLIKELY(!rt_process_file_write_eol(target_eol, output_stream)))
+	if (RT_UNLIKELY(!rt_encoding_write_eol(target_eol, RT_ENCODING_US_ASCII, output_stream)))
 		goto end;
 
 	ret = RT_OK;

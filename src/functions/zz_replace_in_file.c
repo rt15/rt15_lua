@@ -31,7 +31,7 @@ static rt_s zz_replace_in_file_callback(const rt_char8 *line, rt_un line_size, e
 	if (RT_UNLIKELY(!output_stream->write(output_stream, buffer, buffer_size)))
 		goto end;
 
-	if (RT_UNLIKELY(!rt_process_file_write_eol(eol, output_stream)))
+	if (RT_UNLIKELY(!rt_encoding_write_eol(eol, RT_ENCODING_US_ASCII, output_stream)))
 		goto end;
 
 	ret = RT_OK;
